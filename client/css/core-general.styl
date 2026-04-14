@@ -36,6 +36,16 @@ body
 body.darktheme
     color: $text-color-darktheme !important
     background: $window-color-darktheme
+    a,
+    a:link,
+    a:visited,
+    a:hover,
+    a:active
+        color: $text-color-darktheme !important
+        &.inactive
+            color: $inactive-link-color-darktheme
+        &.icon
+            color: $inactive-link-color-darktheme
 
 h1, h2, h3
     font-weight: normal
@@ -71,17 +81,6 @@ a
     .vim-nav-hint
         position: absolute
         visibility: hidden
-body.darktheme a,
-body.darktheme a:link,
-body.darktheme a:visited,
-body.darktheme a:hover,
-body.darktheme a:active
-    color: $text-color-darktheme !important
-    &.inactive
-        color: $inactive-link-color-darktheme
-    &.icon
-        color: $inactive-link-color-darktheme
-
 a.append, span.append
     margin-left: 1em
 form .fa-question-circle-o
