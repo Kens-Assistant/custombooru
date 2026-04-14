@@ -8,6 +8,9 @@ services:
     build:
       context: ./server
       target: development
+      args:
+        PUID: "${PUID:-1000}"
+        PGID: "${PGID:-1000}"
     depends_on:
       - sql
     environment:
