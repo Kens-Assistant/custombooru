@@ -71,7 +71,11 @@ a
     .vim-nav-hint
         position: absolute
         visibility: hidden
-body.darktheme a
+body.darktheme a,
+body.darktheme a:link,
+body.darktheme a:visited,
+body.darktheme a:hover,
+body.darktheme a:active
     color: $text-color-darktheme !important
     &.inactive
         color: $inactive-link-color-darktheme
