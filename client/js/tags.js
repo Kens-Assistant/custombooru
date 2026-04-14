@@ -19,7 +19,7 @@ function refreshCategoryColorMap() {
                 _stylesheet.sheet.cssRules.length
             );
             _stylesheet.sheet.insertRule(
-                `body.darktheme .${ruleName} { color: white !important }`,
+                `body.darktheme a.${ruleName} { color: white !important }`,
                 _stylesheet.sheet.cssRules.length
             );
         }
@@ -30,7 +30,7 @@ function refreshCategoryColorMap() {
             _stylesheet.sheet.cssRules.length
         );
         _stylesheet.sheet.insertRule(
-            `body.darktheme .tag-default { color: white !important }`,
+            `body.darktheme a.tag-default { color: white !important }`,
             _stylesheet.sheet.cssRules.length
         );
     });
