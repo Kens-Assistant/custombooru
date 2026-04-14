@@ -1,7 +1,5 @@
-<p>Szurubooru is an image board engine inspired by services such as Danbooru,
-Gelbooru and Moebooru. Its name <a href='http://sjp.pwn.pl/sjp/;2527372'>has
-its roots in Polish language and has onomatopeic meaning of scraping or
-scrubbing</a>. It is pronounced as <em>shoorubooru</em>.</p>
+<p>Assistantbooru is an image board built for the bot to automatically crosspost every image and video it receives.
+Media is archived and organized for easy browsing on the booru, and can also be viewed directly through the bot on Discord.</p>
 
 <p class='section'><strong>Registration</strong></p>
 
