@@ -21,8 +21,25 @@ class DownloadTooLargeError(DownloadError):
     pass
 
 
+def _max_dl_filesize_bytes() -> int:
+    value = config.config["max_dl_filesize"]
+    if isinstance(value, bool):
+        raise errors.ConfigError("max_dl_filesize must be numeric")
+    if isinstance(value, (int, float)):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(float(value.strip().replace("_", "")))
+        except ValueError as ex:
+            raise errors.ConfigError(
+                f"Invalid max_dl_filesize value: {value!r}"
+            ) from ex
+    raise errors.ConfigError("max_dl_filesize must be numeric")
+
+
 def download(url: str, use_video_downloader: bool = False) -> bytes:
     assert url
+    max_dl_filesize = _max_dl_filesize_bytes()
     youtube_dl_error = None
     if use_video_downloader:
         try:
@@ -41,10 +58,10 @@ def download(url: str, use_video_downloader: bool = False) -> bytes:
         with urllib.request.urlopen(request) as handle:
             while chunk := handle.read(_dl_chunk_size):
                 length_tally += len(chunk)
-                if length_tally > config.config["max_dl_filesize"]:
+                if length_tally > max_dl_filesize:
                     raise DownloadTooLargeError(
                         "Download target exceeds maximum. (%d)"
-                        % (config.config["max_dl_filesize"]),
+                        % (max_dl_filesize),
                         extra_fields={"URL": url},
                     )
                 content_buffer += chunk
