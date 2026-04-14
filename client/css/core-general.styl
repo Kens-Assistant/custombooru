@@ -71,7 +71,7 @@ a
     .vim-nav-hint
         position: absolute
         visibility: hidden
-.darktheme a
+body.darktheme a
     &.inactive
         color: $inactive-link-color-darktheme
     &.icon
@@ -116,7 +116,7 @@ form .fa-question-circle-o
             >*:last-child
                 margin-bottom: 0
 
-.darktheme #content-holder
+body.darktheme #content-holder
     >.content-wrapper:not(.transparent)
         background: $top-navigation-color-darktheme
 
@@ -126,15 +126,15 @@ hr
     margin: 1em 0
     padding: 0
 
-.darktheme hr
+body.darktheme hr
     border-top: 1px solid darken($line-color, 25%)
 
 a.tag-default,
 span.tag-default
     color: black !important
 
-.darktheme a.tag-default,
-.darktheme span.tag-default
+body.darktheme a.tag-default,
+body.darktheme span.tag-default
     color: white !important
 
 nav
