@@ -18,6 +18,10 @@ function refreshCategoryColorMap() {
                 `.${ruleName} { color: ${category.color} }`,
                 _stylesheet.sheet.cssRules.length
             );
+            _stylesheet.sheet.insertRule(
+                `body.darktheme .${ruleName} { color: white !important }`,
+                _stylesheet.sheet.cssRules.length
+            );
         }
 
         // Keep default tags legible regardless of category color configuration.
