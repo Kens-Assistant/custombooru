@@ -156,3 +156,28 @@ def test_multiple_webhooks(config_injector):
 def test_malformed_webhooks(config_injector):
     with pytest.raises(ValueError):
         net._post_to_webhook("malformed_url", {"test_arg": "test_value"})
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (100000000, 100000000),
+        (1.0e8, 100000000),
+        ("1E+8", 100000000),
+        ("100_000_000", 100000000),
+    ],
+)
+def test_max_dl_filesize_bytes_accepts_common_numeric_formats(
+    config_injector, value, expected
+):
+    config_injector({"max_dl_filesize": value})
+    assert net._max_dl_filesize_bytes() == expected
+
+
+@pytest.mark.parametrize("value", [True, "abc", None])
+def test_max_dl_filesize_bytes_rejects_invalid_values(
+    config_injector, value
+):
+    config_injector({"max_dl_filesize": value})
+    with pytest.raises(errors.ConfigError):
+        net._max_dl_filesize_bytes()
