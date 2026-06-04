@@ -26,6 +26,7 @@ services:
       #POSTGRES_PORT: 5432
       #LOG_SQL: 0 (1 for verbose SQL logs)
       THREADS:
+    restart: unless-stopped
     volumes:
       - "${MOUNT_DATA}:/data"
       - "./server/config.yaml:/opt/app/config.yaml"
@@ -45,6 +46,7 @@ services:
       - "${MOUNT_DATA}:/data:ro"
     ports:
       - "${PORT}:80"
+    restart: unless-stopped
 
   sql:
     image: postgres:11-alpine
