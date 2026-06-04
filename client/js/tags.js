@@ -46,14 +46,14 @@ function refreshCategoryColorMap() {
         // Keep default tags legible regardless of category color configuration.
         // Use inherited color so the tag respects theme text color instead of
         // forcing a literal black, which can be invisible on dark backgrounds.
-        _stylesheet.sheet.insertRule(
-            `.tag-default { color: inherit !important }`,
-            _stylesheet.sheet.cssRules.length
-        );
-        _stylesheet.sheet.insertRule(
-            `body.darktheme a.tag-default { color: inherit !important }`,
-            _stylesheet.sheet.cssRules.length
-        );
+        // _stylesheet.sheet.insertRule(
+        //     `.tag-default { color: inherit !important }`,
+        //     _stylesheet.sheet.cssRules.length
+        // );
+        // _stylesheet.sheet.insertRule(
+        //     `body.darktheme a.tag-default { color: inherit !important }`,
+        //     _stylesheet.sheet.cssRules.length
+        // );
     });
 }
 
