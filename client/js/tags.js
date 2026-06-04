@@ -14,11 +14,15 @@ function refreshCategoryColorMap() {
         document.head.appendChild(_stylesheet);
         for (let category of response.results) {
             const ruleName = misc.makeCssName(category.name, "tag");
-            // Prefer not to override link colors directly. Apply category
-            // colors only to non-anchor elements so anchors can use the
-            // site's default link styling whenever possible.
+            // Apply category colors to non-anchor elements and to anchor
+            // elements with higher precedence so tag links keep their
+            // configured color even if a global `a` rule appears later.
             _stylesheet.sheet.insertRule(
                 `.${ruleName}:not(a) { color: ${category.color} }`,
+                _stylesheet.sheet.cssRules.length
+            );
+            _stylesheet.sheet.insertRule(
+                `a.${ruleName} { color: ${category.color} !important }`,
                 _stylesheet.sheet.cssRules.length
             );
                 // Only force white in dark theme for categories whose configured
@@ -33,11 +37,10 @@ function refreshCategoryColorMap() {
                         // relative luminance approximation
                         const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
                         if (lum < 0.2) {
-                            // Only force white for non-anchor elements in dark
-                            // theme; avoid forcibly overriding anchor colors so
-                            // links keep the stylesheet's preferred color.
+                            // For very-dark configured colors, force white for
+                            // anchors in darktheme so they remain legible.
                             _stylesheet.sheet.insertRule(
-                                `body.darktheme .${ruleName}:not(a) { color: white !important }`,
+                                `body.darktheme a.${ruleName} { color: white !important }`,
                                 _stylesheet.sheet.cssRules.length
                             );
                         }
