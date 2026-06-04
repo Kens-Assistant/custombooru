@@ -54,6 +54,12 @@ body.darktheme
 body.darktheme a:not([class])
     color: $text-color-darktheme !important
 
+// Default unclassed links to the theme text color so source/search links
+// remain visible on dark backgrounds but classed links (e.g. tag colors)
+// are not overridden.
+a:not([class])
+    color: $text-color
+
 h1, h2, h3
     font-weight: normal
     margin-bottom: 1em
