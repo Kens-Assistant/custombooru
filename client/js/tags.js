@@ -14,8 +14,10 @@ function refreshCategoryColorMap() {
         document.head.appendChild(_stylesheet);
         for (let category of response.results) {
             const ruleName = misc.makeCssName(category.name, "tag");
+            // Apply category color specifically to anchor elements with the
+            // category class so they take precedence over generic link rules.
             _stylesheet.sheet.insertRule(
-                `.${ruleName} { color: ${category.color} }`,
+                `a.${ruleName} { color: ${category.color} }`,
                 _stylesheet.sheet.cssRules.length
             );
                 // Only force white in dark theme for categories whose configured

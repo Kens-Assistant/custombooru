@@ -47,6 +47,13 @@ body.darktheme
         &.icon
             color: $inactive-link-color-darktheme
 
+// In dark theme, ensure unclassed links (typical external/source/search links)
+// default to the theme text color so they are visible on dark backgrounds,
+// but do not override links that have a specific class (and therefore a
+// deliberate color) assigned.
+body.darktheme a:not([class])
+    color: $text-color-darktheme !important
+
 h1, h2, h3
     font-weight: normal
     margin-bottom: 1em
