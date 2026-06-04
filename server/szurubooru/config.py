@@ -49,6 +49,29 @@ def _file_config(filename: str) -> Dict:
         return yaml.load(handle.read(), Loader=yaml.SafeLoader) or {}
 
 
+def _coerce_max_dl_filesize(value):
+    if isinstance(value, bool):
+        raise errors.ConfigError("max_dl_filesize must be numeric")
+    if isinstance(value, (int, float)):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(float(value.strip().replace("_", "")))
+        except ValueError as ex:
+            raise errors.ConfigError(
+                f"Invalid max_dl_filesize value: {value!r}"
+            ) from ex
+    raise errors.ConfigError("max_dl_filesize must be numeric")
+
+
+def _normalize_config_types(cfg: Dict) -> Dict:
+    if "max_dl_filesize" in cfg:
+        cfg["max_dl_filesize"] = _coerce_max_dl_filesize(
+            cfg["max_dl_filesize"]
+        )
+    return cfg
+
+
 def _running_inside_container() -> bool:
     env = os.environ.keys()
     return (
@@ -68,7 +91,7 @@ def _read_config() -> Dict:
         )
     if _running_inside_container():
         ret = _merge(ret, _container_config())
-    return ret
+    return _normalize_config_types(ret)
 
 
 config = _read_config()
