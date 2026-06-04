@@ -18,10 +18,27 @@ function refreshCategoryColorMap() {
                 `.${ruleName} { color: ${category.color} }`,
                 _stylesheet.sheet.cssRules.length
             );
-            _stylesheet.sheet.insertRule(
-                `body.darktheme a.${ruleName} { color: white !important }`,
-                _stylesheet.sheet.cssRules.length
-            );
+                // Only force white in dark theme for categories whose configured
+                // color is too dark to be legible on a dark background.
+                try {
+                    const hex = category.color.trim();
+                    const m = hex.match(/^#?([0-9a-fA-F]{6})$/);
+                    if (m) {
+                        const r = parseInt(m[1].substr(0,2), 16);
+                        const g = parseInt(m[1].substr(2,2), 16);
+                        const b = parseInt(m[1].substr(4,2), 16);
+                        // relative luminance approximation
+                        const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+                        if (lum < 0.2) {
+                            _stylesheet.sheet.insertRule(
+                                `body.darktheme a.${ruleName} { color: white !important }`,
+                                _stylesheet.sheet.cssRules.length
+                            );
+                        }
+                    }
+                } catch (e) {
+                    // If parsing fails, do not forcibly override category color.
+                }
         }
 
         // Keep default tags legible regardless of category color configuration.
