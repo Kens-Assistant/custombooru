@@ -202,7 +202,10 @@ function makePostLink(id, includeHash) {
     return api.hasPrivilege("posts:view")
         ? makeElement(
               "a",
-              { href: uri.formatClientLink("post", id) },
+              {
+                  href: uri.formatClientLink("post", id),
+                  style: "color: inherit !important; text-decoration: inherit !important",
+              },
               misc.escapeHtml(text)
           )
         : misc.escapeHtml(text);
@@ -223,6 +226,7 @@ function makeTagLink(name, includeHash, includeCount, tag) {
               {
                   href: uri.formatClientLink("tag", name),
                   class: misc.makeCssName(category, "tag"),
+                  style: "color: inherit !important; text-decoration: inherit !important",
               },
               misc.escapeHtml(text)
           )
@@ -250,6 +254,7 @@ function makePoolLink(id, includeHash, includeCount, pool, name) {
               {
                   href: uri.formatClientLink("pool", id),
                   class: misc.makeCssName(category, "pool"),
+                  style: "color: inherit !important; text-decoration: inherit !important",
               },
               misc.escapeHtml(text)
           )
@@ -267,7 +272,10 @@ function makeUserLink(user) {
         user && user.name && api.hasPrivilege("users:view")
             ? makeElement(
                   "a",
-                  { href: uri.formatClientLink("user", user.name) },
+                  {
+                      href: uri.formatClientLink("user", user.name),
+                      style: "color: inherit !important; text-decoration: inherit !important",
+                  },
                   text
               )
             : text;
