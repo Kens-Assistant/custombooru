@@ -226,7 +226,6 @@ function makeTagLink(name, includeHash, includeCount, tag) {
               {
                   href: uri.formatClientLink("tag", name),
                   class: misc.makeCssName(category, "tag"),
-                  style: "color: inherit !important; text-decoration: inherit !important",
               },
               misc.escapeHtml(text)
           )
@@ -254,7 +253,6 @@ function makePoolLink(id, includeHash, includeCount, pool, name) {
               {
                   href: uri.formatClientLink("pool", id),
                   class: misc.makeCssName(category, "pool"),
-                  style: "color: inherit !important; text-decoration: inherit !important",
               },
               misc.escapeHtml(text)
           )
