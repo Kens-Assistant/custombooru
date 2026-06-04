@@ -1,0 +1,13 @@
+@import colors
+
+// Final overrides to ensure links are visible on dark backgrounds.
+// This file is named to come last in the compiled order so it overrides
+// earlier declarations.
+
+a
+    color: $text-color !important
+    text-decoration: underline !important
+
+body.darktheme a
+    color: $text-color-darktheme !important
+    text-decoration: underline !important
