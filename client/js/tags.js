@@ -19,6 +19,16 @@ function refreshCategoryColorMap() {
                 _stylesheet.sheet.cssRules.length
             );
         }
+
+        // Keep default tags legible regardless of category color configuration.
+        _stylesheet.sheet.insertRule(
+            `.tag-default { color: black !important }`,
+            _stylesheet.sheet.cssRules.length
+        );
+        _stylesheet.sheet.insertRule(
+            `body.darktheme .tag-default { color: white !important }`,
+            _stylesheet.sheet.cssRules.length
+        );
     });
 }
 
