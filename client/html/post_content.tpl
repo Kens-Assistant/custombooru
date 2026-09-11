@@ -19,6 +19,7 @@
                 loop: (ctx.post.flags || []).includes('loop'),
                 playsinline: true,
                 autoplay: ctx.autoplay,
+                muted: ctx.autoplay,
             },
             ctx.makeElement('source', {
                 type: ctx.post.mimeType,
