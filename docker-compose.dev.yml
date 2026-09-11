@@ -1,6 +1,6 @@
 ## Docker Compose configuration for dev iteration
 ##
-## Data is transient by using named vols.
+## Data is stored in the host directories configured in .env.
 ## Run: docker-compose -f ./docker-compose.dev.yml up
 services:
 
@@ -26,7 +26,7 @@ services:
       #LOG_SQL: 0 (1 for verbose SQL logs)
       THREADS:
     volumes:
-      - "data:/data"
+      - "${MOUNT_DATA}:/data"
       - "./server/:/opt/app/"
 
   client:
@@ -36,7 +36,7 @@ services:
     depends_on:
       - server
     volumes:
-      - "data:/data:ro"
+      - "${MOUNT_DATA}:/data:ro"
       - "./client/:/opt/app/"
       - "/opt/app/public/"
     ports:
@@ -50,8 +50,4 @@ services:
       POSTGRES_USER:
       POSTGRES_PASSWORD:
     volumes:
-      - "sql:/var/lib/postgresql/data"
-
-volumes:
-  data:
-  sql:
+      - "${MOUNT_SQL}:/var/lib/postgresql/data"
