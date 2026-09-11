@@ -31,7 +31,7 @@ const external_js = [
 ];
 
 const app_manifest = {
-    name: 'szurubooru',
+    name: 'custombooru',
     icons: [
         {
             src: baseUrl() + 'img/android-chrome-192x192.png',
@@ -217,21 +217,23 @@ function bundleJs() {
 const environment = process.argv.includes('--watch') ? "development" : "production";
 
 function bundleConfig() {
-    function getVersion() {
-        let build_info = process.env.BUILD_INFO;
-        if (!build_info) {
-            try {
-                build_info = execSync('git describe --always --dirty --long --tags').toString();
-            } catch (e) {
-                console.warn('Cannot find build version');
-                build_info = 'unknown';
-            }
+    function getCommitHash() {
+        if (process.env.BUILD_INFO) {
+            return process.env.BUILD_INFO.trim();
         }
-        return build_info.trim();
+        try {
+            return execSync('git rev-parse --short HEAD').toString().trim();
+        } catch (e) {
+            console.warn('Cannot find build version');
+            return 'unknown';
+        }
     }
+    const commitHash = getCommitHash();
     const config = {
         meta: {
-            version: getVersion(),
+            version: commitHash,
+            commitHash: commitHash,
+            commitUrl: `https://github.com/Kens-Assistant/custombooru/commit/${commitHash}`,
             buildDate: new Date().toUTCString()
         },
         environment: environment

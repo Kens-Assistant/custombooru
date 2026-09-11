@@ -70,6 +70,12 @@
         <% if (ctx.canEditPostTags) { %>
             <section class='tags'>
                 <%= ctx.makeTextInput({}) %>
+                <% if (ctx.canSuggestTags && ctx.post.source) { %>
+                    <div class='tag-suggestions-container'>
+                        <a href class='suggest-tags'>Suggest tags from source</a>
+                        <div class='tag-suggestions-list' hidden></div>
+                    </div>
+                <% } %>
             </section>
         <% } %>
 

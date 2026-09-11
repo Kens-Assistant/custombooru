@@ -4,8 +4,10 @@ from typing import Dict, List, Optional
 from szurubooru import db, errors, model, rest, search
 from szurubooru.func import (
     auth,
+    autotagger,
     favorites,
     mime,
+    pools,
     posts,
     scores,
     serialization,
@@ -108,6 +110,138 @@ def create_snapshots_for_post(
     snapshots.create(post, user)
     for tag in new_tags:
         snapshots.create(tag, user)
+
+
+@rest.routes.post("/post/(?P<post_id>[^/]+)/tag-suggestions/?")
+def get_tag_suggestions(
+    ctx: rest.Context, params: Dict[str, str]
+) -> rest.Response:
+    auth.verify_privilege(ctx.user, "posts:edit:tags")
+    post = _get_post(params)
+    suggestions = autotagger.suggest(post)
+    return {"suggestions": suggestions}
+
+
+@rest.routes.post("/posts/gallery/?")
+def create_gallery(
+    ctx: rest.Context, _params: Dict[str, str] = {}
+) -> rest.Response:
+    """
+    Create multiple posts in order and wrap them in a pool (gallery).
+
+    Request body (JSON):
+    {
+        "items": [
+            {
+                "contentUrl": "https://...",
+                "tags": ["tag1"],
+                "safety": "safe",
+                "source": "https://...",
+                "flags": []
+            },
+            ...
+        ],
+        "poolName": "Gallery title",
+        "poolCategory": "gallery",   // optional, falls back to default
+        "tags": ["shared_tag"],      // applied to every item
+        "safety": "safe",            // default for items that omit it
+        "source": "https://..."      // default source for all items
+    }
+
+    Returns:
+    {
+        "pool": <pool resource>,
+        "posts": [<post resource>, ...]
+    }
+    """
+    anonymous = ctx.get_param_as_bool("anonymous", default=False)
+    if anonymous:
+        auth.verify_privilege(ctx.user, "posts:create:anonymous")
+    else:
+        auth.verify_privilege(ctx.user, "posts:create:identified")
+
+    items = ctx.get_param_as_list("items", default=[])
+    if not items:
+        raise posts.InvalidPostSourceError("Gallery must contain at least one item.")
+
+    pool_name = ctx.get_param_as_string("poolName", default="")
+    if not pool_name:
+        raise pools.InvalidPoolNameError("poolName is required for gallery upload.")
+
+    pool_category = ctx.get_param_as_string("poolCategory", default="")
+    shared_tag_names = ctx.get_param_as_string_list("tags", default=[])
+    default_safety = ctx.get_param_as_string("safety", default="safe")
+    default_source = ctx.get_param_as_string("source", default="")
+
+    uploader = None if anonymous else ctx.user
+    created_posts = []
+    all_new_tags = []
+
+    for item in items:
+        if not isinstance(item, dict):
+            raise posts.InvalidPostSourceError("Each gallery item must be an object.")
+        content_url = item.get("contentUrl") or item.get("source", "")
+        if not content_url:
+            raise posts.InvalidPostSourceError("Each gallery item needs a contentUrl.")
+
+        try:
+            content = ctx.context.get("_net_download", None)
+            from szurubooru.func import net as _net
+            content = _net.download(
+                content_url,
+                use_video_downloader=auth.has_privilege(
+                    ctx.user, "uploads:use_downloader"
+                ),
+            )
+        except Exception as exc:
+            raise posts.InvalidPostSourceError(
+                f"Could not download gallery item: {exc}"
+            )
+
+        item_tag_names = list(shared_tag_names) + list(
+            item.get("tags") or []
+        )
+        item_safety = item.get("safety") or default_safety
+        item_source = item.get("source") or default_source or content_url
+        item_flags = item.get("flags") or posts.get_default_flags(content)
+
+        post, new_tags = posts.create_post(content, item_tag_names, uploader)
+        if new_tags:
+            auth.verify_privilege(ctx.user, "tags:create")
+        posts.update_post_safety(post, item_safety)
+        posts.update_post_source(post, item_source)
+        posts.update_post_flags(post, item_flags)
+        ctx.session.add(post)
+        ctx.session.flush()
+        create_snapshots_for_post(post, new_tags, uploader)
+        created_posts.append(post)
+        all_new_tags.extend(new_tags)
+
+    # Resolve pool category — use provided or fall back to site default
+    from szurubooru.func import pool_categories as _pool_cats
+    if pool_category:
+        try:
+            _pool_cats.get_category_by_name(pool_category)
+        except Exception:
+            pool_category = _pool_cats.get_default_category_name()
+    else:
+        pool_category = _pool_cats.get_default_category_name()
+
+    pool = pools.create_pool(
+        names=[pool_name],
+        category_name=pool_category,
+        post_ids=[p.post_id for p in created_posts],
+    )
+    pool.description = default_source or ""
+    ctx.session.add(pool)
+    ctx.session.flush()
+    snapshots.create(pool, uploader)
+    ctx.session.commit()
+
+    return {
+        "pool": pools.serialize_pool(pool),
+        "posts": [_serialize_post(ctx, p) for p in created_posts],
+    }
 
 
 @rest.routes.get("/post/(?P<post_id>[^/]+)/?")

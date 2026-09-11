@@ -33,6 +33,7 @@ class PostEditSidebarControl extends events.EventTarget {
                 canEditPostSafety: api.hasPrivilege("posts:edit:safety"),
                 canEditPostSource: api.hasPrivilege("posts:edit:source"),
                 canEditPostTags: api.hasPrivilege("posts:edit:tags"),
+                canSuggestTags: api.hasPrivilege("posts:edit:tags"),
                 canEditPostRelations: api.hasPrivilege("posts:edit:relations"),
                 canEditPostNotes:
                     api.hasPrivilege("posts:edit:notes") &&
@@ -96,6 +97,12 @@ class PostEditSidebarControl extends events.EventTarget {
             this._tagControl = new TagInputControl(
                 this._tagInputNode,
                 post.tags
+            );
+        }
+
+        if (this._suggestTagsLinkNode) {
+            this._suggestTagsLinkNode.addEventListener("click", (e) =>
+                this._evtSuggestTags(e)
             );
         }
 
@@ -455,6 +462,14 @@ class PostEditSidebarControl extends events.EventTarget {
         return this._formNode.querySelector(".tags input");
     }
 
+    get _suggestTagsLinkNode() {
+        return this._formNode.querySelector(".tags .suggest-tags");
+    }
+
+    get _suggestionsListNode() {
+        return this._formNode.querySelector(".tag-suggestions-list");
+    }
+
     get _poolInputNode() {
         return this._formNode.querySelector(".pools input");
     }
@@ -543,6 +558,71 @@ class PostEditSidebarControl extends events.EventTarget {
 
     disableForm() {
         views.disableForm(this._formNode);
+    }
+
+    _evtSuggestTags(e) {
+        e.preventDefault();
+        const linkNode = this._suggestTagsLinkNode;
+        const listNode = this._suggestionsListNode;
+        if (!linkNode || !listNode) return;
+
+        linkNode.textContent = "Loading…";
+        linkNode.style.pointerEvents = "none";
+
+        const uri = require("../util/uri.js");
+        api.post(
+            uri.formatApiLink("post", this._post.id, "tag-suggestions")
+        ).then(
+            (response) => {
+                linkNode.textContent = "Suggest tags from source";
+                linkNode.style.pointerEvents = "";
+
+                const suggestions = response.suggestions || [];
+                if (!suggestions.length) {
+                    listNode.textContent = "No suggestions found.";
+                    listNode.hidden = false;
+                    return;
+                }
+
+                listNode.innerHTML = "";
+                listNode.hidden = false;
+
+                const existingNames = new Set(
+                    Array.from(this._post.tags).map((t) =>
+                        t.names[0].toLowerCase()
+                    )
+                );
+
+                for (const suggestion of suggestions) {
+                    if (existingNames.has(suggestion.name.toLowerCase())) {
+                        continue;
+                    }
+                    const item = document.createElement("span");
+                    item.className = "tag-suggestion-item";
+                    const pct = Math.round(suggestion.confidence * 100);
+                    item.innerHTML =
+                        `<a href class="add-suggested-tag" title="${suggestion.source} (${pct}%)">` +
+                        `+ ${suggestion.name}</a> `;
+                    item.querySelector("a").addEventListener("click", (ev) => {
+                        ev.preventDefault();
+                        if (this._tagControl) {
+                            this._tagControl.addTagByName(suggestion.name, "suggestion");
+                        }
+                        item.remove();
+                    });
+                    listNode.appendChild(item);
+                }
+
+                if (!listNode.children.length) {
+                    listNode.textContent = "All suggestions already applied.";
+                }
+            },
+            (error) => {
+                linkNode.textContent = "Suggest tags from source";
+                linkNode.style.pointerEvents = "";
+                views.showError(this._hostNode, error.message || "Tag suggestion failed.");
+            }
+        );
     }
 
     clearMessages() {

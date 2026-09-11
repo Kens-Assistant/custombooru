@@ -14,6 +14,8 @@ class HomeController {
         this._homeView = new HomeView({
             name: api.getName(),
             version: config.meta.version,
+            commitHash: config.meta.commitHash || config.meta.version,
+            commitUrl: config.meta.commitUrl,
             buildDate: config.meta.buildDate,
             canListSnapshots: api.hasPrivilege("snapshots:list"),
             canListPosts: api.hasPrivilege("posts:list"),

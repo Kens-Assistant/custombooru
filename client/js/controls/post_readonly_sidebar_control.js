@@ -20,10 +20,42 @@ class PostReadonlySidebarControl extends events.EventTarget {
         post.addEventListener("changeFavorite", (e) => this._evtChangeFav(e));
         post.addEventListener("changeScore", (e) => this._evtChangeScore(e));
 
+        this._render();
+        this._installFav();
+        this._installScore();
+        this._installFitButtons();
+        this._syncFitButton();
+
+        // Gallery navigation is optional. Render the normal sidebar first so a
+        // failed pool request cannot prevent the post controls from appearing.
+        if (post.pools.length) {
+            this._loadPoolNavigation();
+        }
+    }
+
+    _render(poolsWithNav = {}) {
+        // Templates should receive plain data rather than model instances. In
+        // particular, this keeps pool navigation independent of PoolList's
+        // implementation and allows the sidebar to render before enrichment.
+        const pools = Array.from(this._post.pools).map((pool) =>
+            Object.assign(
+                {
+                    id: pool.id,
+                    names: pool.names || [],
+                    _galleryPrev: null,
+                    _galleryNext: null,
+                    _galleryPos: null,
+                    _galleryTotal: pool.postCount || null,
+                },
+                poolsWithNav[pool.id] || {}
+            )
+        );
+
         views.replaceContent(
             this._hostNode,
             template({
                 post: this._post,
+                pools: pools,
                 enableSafety: api.safetyEnabled(),
                 canListPosts: api.hasPrivilege("posts:list"),
                 canEditPosts: api.hasPrivilege("posts:edit"),
@@ -31,13 +63,44 @@ class PostReadonlySidebarControl extends events.EventTarget {
                 escapeTagName: uri.escapeTagName,
                 extractRootDomain: uri.extractRootDomain,
                 getPrettyName: misc.getPrettyName,
+                parameters: {},
             })
         );
+    }
 
-        this._installFav();
-        this._installScore();
-        this._installFitButtons();
-        this._syncFitButton();
+    _loadPoolNavigation() {
+        const postId = this._post.id;
+        const poolIds = Array.from(this._post.pools).map((p) => p.id);
+
+        Promise.all(
+            poolIds.map((poolId) =>
+                api
+                    .get(uri.formatApiLink("pool", poolId))
+                    .then((response) => ({ poolId, response }))
+                    .catch(() => null)
+            )
+        ).then((results) => {
+            const poolsWithNav = {};
+            for (const result of results) {
+                if (!result) continue;
+                const { poolId, response } = result;
+                const postIds = (response.posts || []).map((p) => p.id);
+                const idx = postIds.findIndex((id) => String(id) === String(postId));
+                if (idx === -1) continue;
+                poolsWithNav[poolId] = {
+                    _galleryPrev: idx > 0 ? postIds[idx - 1] : null,
+                    _galleryNext:
+                        idx < postIds.length - 1 ? postIds[idx + 1] : null,
+                    _galleryPos: idx + 1,
+                    _galleryTotal: postIds.length,
+                };
+            }
+            this._render(poolsWithNav);
+            this._installFav();
+            this._installScore();
+            this._installFitButtons();
+            this._syncFitButton();
+        });
     }
 
     get _scoreContainerNode() {

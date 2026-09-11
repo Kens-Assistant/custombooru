@@ -68,6 +68,25 @@
         </section>
     </article>
 
+    <% if (ctx.pools && ctx.pools.length) { %>
+        <% for (let pool of ctx.pools) { %>
+            <nav class='pool-nav'>
+                <h1>Gallery: <a href='<%- ctx.formatClientLink("pool", pool.id) %>'><%- pool.names[0] %></a></h1>
+                <% if (pool._galleryPrev) { %>
+                    <a class='pool-prev' href='<%- ctx.getPostUrl(pool._galleryPrev, ctx.parameters) %>'>
+                        <i class='fa fa-chevron-left'></i> Previous
+                    </a>
+                <% } %>
+                <span class='pool-position'><%- pool._galleryPos %> / <%- pool._galleryTotal %></span>
+                <% if (pool._galleryNext) { %>
+                    <a class='pool-next' href='<%- ctx.getPostUrl(pool._galleryNext, ctx.parameters) %>'>
+                        Next <i class='fa fa-chevron-right'></i>
+                    </a>
+                <% } %>
+            </nav>
+        <% } %>
+    <% } %>
+
     <% if (ctx.post.relations.length) { %>
         <nav class='relations'>
             <h1>Relations (<%- ctx.post.relations.length %>)</h1>

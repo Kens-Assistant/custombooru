@@ -2,7 +2,7 @@
 # and override only what you need.
 
 # shown in the website title and on the front page
-name: szurubooru
+name: custombooru
 # full url to the homepage of this szurubooru site, with no trailing slash
 domain: # example: http://example.com
 # used to salt the users' password hashes and generate filenames for static content
@@ -107,6 +107,8 @@ privileges:
     'posts:edit:safety':            power
     'posts:edit:source':            regular
     'posts:edit:tags':              regular
+    'posts:tag-suggestions':        regular
+    'posts:create:gallery':         regular
     'posts:edit:thumbnail':         power
     'posts:feature':                moderator
     'posts:delete':                 moderator
