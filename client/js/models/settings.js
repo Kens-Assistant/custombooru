@@ -8,7 +8,7 @@ const defaultSettings = {
         sketchy: true,
         unsafe: false,
     },
-    upscaleSmallPosts: false,
+    upscaleSmallPosts: true,
     endlessScroll: false,
     keyboardShortcuts: true,
     transparencyGrid: true,

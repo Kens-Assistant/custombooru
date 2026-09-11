@@ -5,11 +5,12 @@ const views = require("../util/views.js");
 const optimizedResize = require("../util/optimized_resize.js");
 
 class PostContentControl {
-    constructor(hostNode, post, viewportSizeCalculator, fitFunctionOverride) {
+    constructor(hostNode, post, viewportSizeCalculator, fitFunctionOverride, autoplayOverride) {
         this._post = post;
         this._viewportSizeCalculator = viewportSizeCalculator;
         this._hostNode = hostNode;
         this._template = views.getTemplate("post-content");
+        this._autoplayOverride = autoplayOverride;
 
         let fitMode = settings.get().fitMode;
         if (typeof fitFunctionOverride !== "undefined") {
@@ -141,7 +142,7 @@ class PostContentControl {
     _reinstall() {
         const newNode = this._template({
             post: this._post,
-            autoplay: settings.get().autoplayVideos,
+            autoplay: this._autoplayOverride !== undefined ? this._autoplayOverride : settings.get().autoplayVideos,
         });
         if (settings.get().transparencyGrid) {
             newNode.classList.add("transparency-grid");

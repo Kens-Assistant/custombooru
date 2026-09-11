@@ -42,7 +42,9 @@ class PostMainView {
                         topNavigationNode.getBoundingClientRect().height -
                         margin * 2,
                 ];
-            }
+            },
+            undefined,
+            true
         );
 
         this._postNotesOverlayControl = new PostNotesOverlayControl(
